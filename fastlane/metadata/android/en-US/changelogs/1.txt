@@ -1,0 +1,1 @@
+First release. Create and edit local routines, follow one step at a time, pause and continue progress, and use optional bundled or locally selected step images. Includes large-text layouts, TalkBack semantics, local-only storage, and no Internet permission.

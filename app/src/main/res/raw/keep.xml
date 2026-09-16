@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/bed_linen_remove_sheet,@drawable/bed_linen_remove_duvet_cover,@drawable/bed_linen_insert_duvet_cover,@drawable/bed_linen_finish_with_bedspread" />

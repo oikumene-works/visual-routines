@@ -1,0 +1,9 @@
+Visual Routines is a local-first Android app for creating and following simple everyday routines one step at a time.
+
+Create routines with short steps and optional notes. Add one optional bundled or locally selected image to a step. While running a routine, see the current step, go back, mark it done, skip it, pause, continue later, reset, or finish.
+
+Visible text remains complete without images. The interface is designed for predictable navigation, large text, and TalkBack semantics.
+
+The app has no account, backend, analytics, advertising, tracking, or Internet permission. Cloud backup is disabled. Supported Android device-to-device migration may transfer a narrow set of app data.
+
+Visual Routines does not provide its own export or import feature. It is a general everyday tool, not a medical, therapeutic, emergency, productivity, habit-tracking, or remote-care service.

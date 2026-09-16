@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include
+        domain="file"
+        path="routines.json"
+        requireFlags="deviceToDeviceTransfer" />
+    <include
+        domain="file"
+        path="user_images/"
+        requireFlags="deviceToDeviceTransfer" />
+    <include
+        domain="sharedpref"
+        path="active_routine.xml"
+        requireFlags="deviceToDeviceTransfer" />
+    <include
+        domain="sharedpref"
+        path="home_settings.xml"
+        requireFlags="deviceToDeviceTransfer" />
+</full-backup-content>

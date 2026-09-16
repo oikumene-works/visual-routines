@@ -1,0 +1,56 @@
+name: Public Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-android-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile, test, lint, assemble, and audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-disabled: true
+
+      - name: Compile, test, verify screenshots, lint, and assemble
+        run: >-
+          ./gradlew
+          :app:compileDebugKotlin
+          :app:compileReleaseKotlin
+          :app:testDebugUnitTest
+          :app:verifyRoborazziDebug
+          :app:lintDebug
+          :app:assembleDebug
+          :app:assembleRelease
+          :app:assembleDebugAndroidTest
+          --no-daemon
+          --no-build-cache
+          --stacktrace
+
+      - name: Audit source-release APK baseline
+        run: ./scripts/audit-release-baseline.sh --apk-only
