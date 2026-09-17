@@ -55,6 +55,19 @@ The project uses Kotlin, Jetpack Compose, and the Gradle Wrapper. Android
 Studio is optional. See [BUILDING.md](BUILDING.md) for the command-line toolchain
 and validation commands.
 
+## Project Contact
+
+GitHub Issues are the primary public tracker for bugs, proposals, and project
+discussion. For a lower-barrier general contact route, email
+[`visual-routines@oikumene.works`](mailto:visual-routines@oikumene.works).
+
+The address is monitored on a best-effort basis. It is not a support,
+emergency, or security service, and no response time is promised. Email
+necessarily shares the sender address and message with the current maintainer;
+do not send routine content, images, device identifiers, account details,
+credentials, or other personal or sensitive information. Use the private route
+in [SECURITY.md](SECURITY.md) for a possible vulnerability.
+
 ## Contributing And Continuation
 
 The current individual maintainer has accepted active, best-effort maintenance

@@ -14,13 +14,13 @@ response time, guaranteed correction, or future release schedule is promised.
 ## Reporting A Vulnerability
 
 Use GitHub private vulnerability reporting from this repository's **Security**
-tab. That feature must be enabled as part of the separately approved public
-source-release gate before `v0.1.0` is tagged.
+tab. That feature is enabled for the public source repository.
 
 Do not open a public issue for an unpatched vulnerability, exploit details,
 credentials, routine content, selected images, device identifiers, or other
 personal information. The project has no security email address or emergency
-response service.
+response service. The general project-contact email listed in
+[README.md](README.md) is not a vulnerability-reporting route.
 
 Include only the minimum non-personal information needed to reproduce the
 problem: affected source tag, Android version, expected boundary, observed
