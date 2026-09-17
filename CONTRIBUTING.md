@@ -11,8 +11,10 @@ promised.
 ## Before Opening Work
 
 - Read the product boundary in [README.md](README.md).
-- Use repository Issues only when they are enabled. Otherwise, a focused pull
-  request may describe the problem it addresses.
+- Use repository Issues as the primary public reporting route. If that route is
+  not accessible, use the general project address in [README.md](README.md) for
+  a concise message without personal or sensitive information. A focused pull
+  request may describe the problem addressed by its proposed change.
 - Keep changes small and explain the user-visible reason for them.
 - Do not include routine data, personal images, device identifiers, account
   details, credentials, or other personal information in an issue, commit,

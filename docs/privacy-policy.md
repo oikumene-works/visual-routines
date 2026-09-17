@@ -1,6 +1,6 @@
 # Visual Routines Privacy Policy
 
-Effective date: 2026-09-16
+Effective date: 2026-09-17
 
 ## Scope
 
@@ -63,6 +63,14 @@ describe or authorize features that are absent from the current version.
 ## Project Contact
 
 Project information and source code are available at
-<https://github.com/oikumene-works/visual-routines>. Do not include routine
-content, images, or other personal information in a public report. The project
-does not currently offer a private support inbox.
+<https://github.com/oikumene-works/visual-routines>. GitHub Issues are the
+primary public reporting route. General project contact may instead be sent to
+<visual-routines@oikumene.works>. This is ordinary email outside the app and
+necessarily shares the sender address and message with the current maintainer;
+the app never sends data to that address automatically.
+
+The address is not a support, emergency, or security service, and no response
+time is promised. Do not include routine content, images, device identifiers,
+account details, credentials, or other personal or sensitive information in an
+email or public report. Follow [SECURITY.md](../SECURITY.md) for a possible
+vulnerability.
