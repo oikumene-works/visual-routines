@@ -72,6 +72,7 @@ internal fun VisualRoutinesApp(
             AppScreen.Settings -> SettingsScreen(state)
             AppScreen.PrivacyPolicy -> PrivacyPolicyScreen(state)
             AppScreen.ManageRoutines -> ManageRoutinesScreen(state)
+            AppScreen.ChooseExample -> ChooseExampleScreen(state)
             AppScreen.ReorderRoutines -> ReorderRoutinesScreen(state)
             is AppScreen.CreateRoutine -> CreateRoutineScreen(
                 state = state,

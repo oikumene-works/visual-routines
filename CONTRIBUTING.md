@@ -3,10 +3,9 @@
 Thank you for considering a contribution to Visual Routines.
 
 The current individual maintainer has accepted active, best-effort maintenance
-of the upstream project and its F-Droid distribution. Version `v0.1.0` is the
-only release currently scheduled. A contribution may be useful even when it is
-not merged, but review, acceptance, response time, and a future release are not
-promised.
+of the upstream project and its F-Droid distribution. Version `0.2.0` is in
+candidate preparation. A contribution may be useful even when it is not merged,
+but review, acceptance, response time, and a future release are not promised.
 
 ## Before Opening Work
 

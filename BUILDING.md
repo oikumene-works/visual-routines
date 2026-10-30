@@ -55,8 +55,8 @@ API-level, phone, tablet, large-text, and human-listened TalkBack validation.
 
 ## F-Droid Build
 
-The intended F-Droid recipe checks out the public `v0.1.0` source tag and runs
-the standard Gradle release-APK task. F-Droid performs its own source scan,
+Each F-Droid build record selects an exact public source commit corresponding
+to the release tag and runs the standard Gradle release-APK task. F-Droid performs its own source scan,
 isolated build, signing, and publication. The upstream project supplies no
 signed reference APK and makes no reproducibility claim without separate
 matching-build evidence.

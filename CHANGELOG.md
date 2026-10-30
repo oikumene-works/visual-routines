@@ -2,7 +2,25 @@
 
 All notable user-visible changes are recorded here.
 
-## 0.1.0 - Unreleased
+## 0.2.0 - Unreleased
+
+### Added
+
+- Create an independent, editable personal routine from a bundled example.
+  The original example and its progress stay unchanged.
+- Send feedback through your email app or copy the project contact address
+  from Settings.
+
+### Unchanged Limitations
+
+- Routine and image export/import remain unavailable.
+- Feedback is handled on a best-effort basis; replies are not guaranteed.
+
+This candidate was implemented and tested by Codex with operator-directed
+wording and human TalkBack listening checks. Automated checks and those bounded
+listening checks do not establish usability for every user or device.
+
+## 0.1.0 - 2026-09-17
 
 ### Added
 

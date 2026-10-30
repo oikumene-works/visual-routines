@@ -1,10 +1,10 @@
 # Visual Routines Privacy Policy
 
-Effective date: 2026-09-17
+Effective date: 2026-10-30
 
 ## Scope
 
-This policy describes Visual Routines version 0.1.0 and how the app works now.
+This policy describes Visual Routines version 0.2.0 and how the app works now.
 
 ## Data Stored On Your Device
 
@@ -62,15 +62,12 @@ describe or authorize features that are absent from the current version.
 
 ## Project Contact
 
-Project information and source code are available at
-<https://github.com/oikumene-works/visual-routines>. GitHub Issues are the
-primary public reporting route. General project contact may instead be sent to
-<visual-routines@oikumene.works>. This is ordinary email outside the app and
-necessarily shares the sender address and message with the current maintainer;
-the app never sends data to that address automatically.
+For general feedback, email <visual-routines@oikumene.works>. **Send feedback**
+opens a draft in your email app; you choose whether to send it. Visual Routines
+does not attach routine content, images, logs, or device identifiers. Sending
+email shares your sender address and message with the maintainer and your email
+providers. Please leave out personal or sensitive information. Replies are not
+guaranteed. This is not an emergency or security service.
 
-The address is not a support, emergency, or security service, and no response
-time is promised. Do not include routine content, images, device identifiers,
-account details, credentials, or other personal or sensitive information in an
-email or public report. Follow [SECURITY.md](../SECURITY.md) for a possible
-vulnerability.
+Project information and the private vulnerability-reporting route are at
+<https://github.com/oikumene-works/visual-routines>.

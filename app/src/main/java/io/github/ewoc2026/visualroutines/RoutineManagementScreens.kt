@@ -1,5 +1,8 @@
 package io.github.ewoc2026.visualroutines
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -46,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -178,6 +183,8 @@ internal fun HomeScreen(state: VisualRoutinesState) {
 internal fun SettingsScreen(state: VisualRoutinesState) {
     BackHandler(onBack = state::backHome)
     val backActionText = stringResource(R.string.back_action)
+    val context = LocalContext.current
+    var feedbackStatus by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         topBar = {
@@ -230,6 +237,34 @@ internal fun SettingsScreen(state: VisualRoutinesState) {
                         .sizeIn(minHeight = 48.dp),
                 ) {
                     Text(text = stringResource(R.string.privacy_policy_title))
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    stringResource(R.string.feedback_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(stringResource(R.string.feedback_explanation))
+                Text(FEEDBACK_EMAIL, style = MaterialTheme.typography.bodyLarge)
+                Button(
+                    onClick = {
+                        feedbackStatus = if (openFeedbackEmail(context)) null else R.string.feedback_no_email_app
+                    },
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) { Text(stringResource(R.string.send_feedback_action)) }
+                OutlinedButton(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Email address", FEEDBACK_EMAIL))
+                        feedbackStatus = R.string.feedback_address_copied
+                    },
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) { Text(stringResource(R.string.copy_email_action)) }
+                feedbackStatus?.let { message ->
+                    Text(
+                        stringResource(message),
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
                 }
             }
         }
@@ -357,6 +392,14 @@ internal fun ManageRoutinesScreen(state: VisualRoutinesState) {
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }
+                OutlinedButton(
+                    onClick = state::openExampleChooser,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = 56.dp),
+                ) {
+                    Text(stringResource(R.string.use_example_action))
+                }
                 val userRoutines = state.routines.filter { it.id in state.userRoutineIds }
                 if (userRoutines.isEmpty()) {
                     Text(
@@ -373,6 +416,54 @@ internal fun ManageRoutinesScreen(state: VisualRoutinesState) {
                             onDelete = { state.requestDeleteRoutine(routine.id) },
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ChooseExampleScreen(state: VisualRoutinesState) {
+    BackHandler(onBack = state::backToManageRoutines)
+    val title = stringResource(R.string.choose_example_title)
+    val backActionText = stringResource(R.string.back_action)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(title, modifier = Modifier.semantics { heading() }) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = state::backToManageRoutines,
+                        modifier = Modifier
+                            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                            .semantics { contentDescription = backActionText },
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                },
+            )
+        },
+        modifier = Modifier.statusBarsPadding(),
+    ) { padding ->
+        ScreenSurface(
+            modifier = Modifier.padding(padding).semantics { paneTitle = title },
+            applySystemBarsPadding = false,
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    stringResource(R.string.choose_example_supporting_text),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                state.exampleRoutines.forEach { routine ->
+                    val copyName = stringResource(R.string.example_copy_name, routine.name)
+                    RoutineCard(
+                        routine = routine,
+                        onClick = { state.openExampleCopy(routine.id, copyName) },
+                    )
                 }
             }
         }
