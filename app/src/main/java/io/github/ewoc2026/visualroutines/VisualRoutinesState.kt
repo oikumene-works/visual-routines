@@ -89,6 +89,35 @@ internal class VisualRoutinesState(
         openCreateRoutine(returnDestination = CreateRoutineReturnDestination.ManageRoutines)
     }
 
+    val exampleRoutines: List<Routine>
+        get() = routines.filterNot { it.id in userRoutineIds }
+
+    fun openExampleChooser() {
+        if (!homeSettings.allowRoutineEditing) return
+        dialog = null
+        screen = AppScreen.ChooseExample
+    }
+
+    /** Opens an unsaved personal draft without reusing example identities or progress. */
+    fun openExampleCopy(routineId: String, title: String) {
+        if (!homeSettings.allowRoutineEditing) return
+        val example = exampleRoutines.find { it.id == routineId } ?: return
+        openCreateRoutine(
+            draft = CreateRoutineDraft(
+                title = title,
+                steps = example.steps.map { step ->
+                    RoutineStepContent(
+                        id = UUID.randomUUID().toString(),
+                        instruction = step.instruction,
+                        note = step.supportingInstruction,
+                        image = step.image,
+                    )
+                },
+            ),
+            returnDestination = CreateRoutineReturnDestination.ManageRoutines,
+        )
+    }
+
     fun openReorderRoutines() {
         if (homeSettings.allowRoutineEditing && userRoutineIds.size > 1) {
             dialog = null
@@ -455,6 +484,7 @@ internal sealed interface AppScreen {
     data object Settings : AppScreen
     data object PrivacyPolicy : AppScreen
     data object ManageRoutines : AppScreen
+    data object ChooseExample : AppScreen
     data object ReorderRoutines : AppScreen
     data class CreateRoutine(
         val draft: CreateRoutineDraft = CreateRoutineDraft(),

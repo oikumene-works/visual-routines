@@ -7,3 +7,5 @@ Visible text remains complete without images. The interface is designed for pred
 The app has no account, backend, analytics, advertising, tracking, or Internet permission. Cloud backup is disabled. Supported Android device-to-device migration may transfer a narrow set of app data.
 
 Visual Routines does not provide its own export or import feature. It is a general everyday tool, not a medical, therapeutic, emergency, productivity, habit-tracking, or remote-care service.
+
+Create a personal routine from an example, then change it to suit your needs. You can send feedback through your email app from Settings.

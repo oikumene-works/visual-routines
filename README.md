@@ -10,18 +10,15 @@ service.
 
 ## Release Status
 
-Version `0.1.0` is the initial upstream release and the only release currently
-scheduled. A release exists only when the matching `v0.1.0` source tag is
-published; do not infer release status from this README or an untagged commit.
-
-F-Droid is the sole preferred APK channel, but inclusion is an external
-decision. Until a verified F-Droid listing is linked here, no preferred APK is
-available. This repository does not publish APKs or Android App Bundles, and CI
-artifacts are not releases.
+Version `0.2.0` is being prepared and is not released yet. Version `0.1.0`
+is available from [F-Droid](https://f-droid.org/packages/io.github.ewoc2026.visualroutines/),
+the preferred APK channel. An untagged commit or development APK is not a release.
+This repository does not publish APKs or Android App Bundles.
 
 ## Features
 
 - Create, edit, reorder, and delete routines stored on the device.
+- Start a personal routine from a bundled example, keeping the example unchanged.
 - Show one clear step at a time with optional short notes.
 - Attach one optional bundled or locally selected image to a step.
 - Continue one paused routine after leaving or restarting the app.
@@ -57,16 +54,11 @@ and validation commands.
 
 ## Project Contact
 
-GitHub Issues are the primary public tracker for bugs, proposals, and project
-discussion. For a lower-barrier general contact route, email
-[`visual-routines@oikumene.works`](mailto:visual-routines@oikumene.works).
-
-The address is monitored on a best-effort basis. It is not a support,
-emergency, or security service, and no response time is promised. Email
-necessarily shares the sender address and message with the current maintainer;
-do not send routine content, images, device identifiers, account details,
-credentials, or other personal or sensitive information. Use the private route
-in [SECURITY.md](SECURITY.md) for a possible vulnerability.
+Use **Send feedback** in Settings to open your email app, or copy the address
+<visual-routines@oikumene.works>. GitHub Issues remain the public work tracker.
+The address is monitored on a best-effort basis; replies are not guaranteed.
+Please leave out personal or sensitive information. Use the private route in
+[SECURITY.md](SECURITY.md) for a possible vulnerability.
 
 ## Contributing And Continuation
 

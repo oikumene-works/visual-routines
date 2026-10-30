@@ -3,10 +3,9 @@
 ## Current Maintenance Boundary
 
 The current individual maintainer has accepted active, best-effort maintenance
-of the upstream project and its F-Droid distribution. Version `v0.1.0` is the
-initial upstream release and the only release currently scheduled. Closing its
-bounded finishing period does not declare the project unmaintained or create
-an open-ended feature roadmap.
+of the upstream project and its F-Droid distribution. The current release and
+candidate status are recorded in [README.md](README.md). Preparing a bounded
+release does not create an open-ended feature roadmap.
 
 Active maintenance means monitoring the project's enabled contribution and
 private vulnerability-reporting surfaces, triaging relevant reports, following
@@ -43,8 +42,8 @@ with the original package.
 ## F-Droid
 
 The current individual maintainer has accepted the active-maintenance
-responsibility needed for the intended F-Droid submission. F-Droid acceptance
-remains an external decision. If this maintenance arrangement later ends, the
+responsibility for the F-Droid distribution. Acceptance of new builds and
+publication remain external decisions. If this maintenance arrangement later ends, the
 project must update its public status rather than imply that an unavailable
 person, the GitHub namespace, or a retired organization still maintains the
 app. The project does not substitute another APK channel or promise F-Droid
