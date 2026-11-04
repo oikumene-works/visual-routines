@@ -10,9 +10,10 @@ service.
 
 ## Release Status
 
-Version `0.2.0` is being prepared and is not released yet. Version `0.1.0`
-is available from [F-Droid](https://f-droid.org/packages/io.github.ewoc2026.visualroutines/),
-the preferred APK channel. An untagged commit or development APK is not a release.
+Version `0.2.0` is available from
+[F-Droid](https://f-droid.org/packages/io.github.ewoc2026.visualroutines/),
+the preferred APK channel. It was added to F-Droid on 2026-11-01.
+An untagged commit or development APK is not a release.
 This repository does not publish APKs or Android App Bundles.
 
 ## Features
