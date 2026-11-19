@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.VisualRoutines" parent="Base.Theme.VisualRoutines">
+        <item name="android:windowLightNavigationBar">@bool/launch_light_system_bars</item>
+        <item name="android:windowDisablePreview">false</item>
+        <item name="android:windowSplashScreenBackground">?android:windowBackground</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <!-- Android persists these names, rather than their numeric resource IDs. -->
+    <style name="Theme.VisualRoutines.Launch.SystemBlack" parent="Theme.VisualRoutines">
+        <item name="android:windowBackground">@color/launch_black_style_background</item>
+        <item name="android:statusBarColor">@color/launch_black_style_background</item>
+        <item name="android:navigationBarColor">@color/launch_black_style_background</item>
+    </style>
+    <style name="Theme.VisualRoutines.Launch.Light" parent="Theme.VisualRoutines">
+        <item name="android:windowBackground">@color/appearance_background_light</item>
+        <item name="android:statusBarColor">@color/appearance_background_light</item>
+        <item name="android:navigationBarColor">@color/appearance_background_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+    <style name="Theme.VisualRoutines.Launch.Dark" parent="Theme.VisualRoutines">
+        <item name="android:windowBackground">@color/appearance_background_dark</item>
+        <item name="android:statusBarColor">@color/appearance_background_dark</item>
+        <item name="android:navigationBarColor">@color/appearance_background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+    <style name="Theme.VisualRoutines.Launch.Black" parent="Theme.VisualRoutines.Launch.Dark">
+        <item name="android:windowBackground">@color/appearance_background_black</item>
+        <item name="android:statusBarColor">@color/appearance_background_black</item>
+        <item name="android:navigationBarColor">@color/appearance_background_black</item>
+    </style>
+</resources>

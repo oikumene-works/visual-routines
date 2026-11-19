@@ -1,0 +1,4 @@
+Choose System, Light or Dark appearance and Standard or Black (AMOLED) dark styling. Your choices are saved locally.
+Keep the active editor line above the keyboard, including large text in landscape.
+Match the launch screen to the selected appearance and improve routine/image recovery after interrupted storage operations.
+Codex implemented and tested these changes, with human TalkBack listening checks.

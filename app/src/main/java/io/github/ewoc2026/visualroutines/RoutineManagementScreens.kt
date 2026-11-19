@@ -219,6 +219,12 @@ internal fun SettingsScreen(state: VisualRoutinesState) {
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                AppearanceSettings(state)
+                Text(
+                    stringResource(R.string.routines_settings_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 16.dp).semantics { heading() },
+                )
                 SettingsToggle(
                     label = stringResource(R.string.show_example_routines),
                     checked = state.homeSettings.showExampleRoutines,

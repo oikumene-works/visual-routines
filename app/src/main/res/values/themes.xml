@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.VisualRoutines" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Base.Theme.VisualRoutines" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
-        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowBackground">@color/launch_background</item>
+        <item name="android:windowLightStatusBar">@bool/launch_light_system_bars</item>
+        <item name="android:navigationBarColor">@color/launch_background</item>
+        <item name="android:statusBarColor">@color/launch_background</item>
+        <!-- Before API 31, Android cannot persist a per-app starting theme.
+             Keep the previous screen until our correctly colored window is ready. -->
+        <item name="android:windowDisablePreview">true</item>
     </style>
+    <style name="Theme.VisualRoutines" parent="Base.Theme.VisualRoutines" />
 </resources>

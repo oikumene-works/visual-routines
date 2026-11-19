@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="launch_background">@color/appearance_background_dark</color>
+    <color name="launch_black_style_background">@color/appearance_background_black</color>
+    <bool name="launch_light_system_bars">false</bool>
+</resources>

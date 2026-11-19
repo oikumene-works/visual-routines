@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Keep these three colors aligned with the Compose palette backgrounds. -->
+    <color name="appearance_background_light">#FCFCF8</color>
+    <color name="appearance_background_dark">#1A1C1B</color>
+    <color name="appearance_background_black">#000000</color>
+    <color name="launch_background">@color/appearance_background_light</color>
+    <color name="launch_black_style_background">@color/appearance_background_light</color>
+    <bool name="launch_light_system_bars">true</bool>
+</resources>

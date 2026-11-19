@@ -2,9 +2,22 @@
 
 All notable user-visible changes are recorded here.
 
-## Unreleased
+## 0.3.0 - Unreleased
+
+### Added
+
+- Choose System, Light or Dark appearance, with Standard or Black (AMOLED)
+  styling for dark appearance. Both choices are stored on the device.
+- Keep the selected dark style while using Light; System applies it when the
+  device switches to dark appearance.
 
 ### Fixed
+
+- Match Android's launch screen to the selected appearance on Android 12 and
+  later. On older versions, wait for the correctly colored app window instead
+  of showing a mismatched starting preview.
+- Keep the editor's active writing line above the keyboard, including short
+  landscape layouts with large text.
 
 - Keep a new routine's identity when restoring its editor after an uncertain
   save, so retrying the save updates that routine instead of creating a duplicate.
@@ -16,11 +29,12 @@ All notable user-visible changes are recorded here.
 - Ignore wrongly typed saved progress during startup so intact routines remain
   accessible, without clearing the stored progress snapshot.
 
-These changes are available in source only and are not included in version
-0.2.0. Codex reproduced the synthetic failure cases, implemented the corrections,
-and ran automated tests and focused Pixel 9a recovery checks. This does not
-establish how often these exceptional conditions occur in normal use or validate
-a new F-Droid binary.
+This is an unpublished candidate; these changes are not part of released
+version 0.2.0. Codex implemented the changes and ran local and device checks,
+including synthetic recovery cases. The operator selected the Appearance design
+and confirmed the focused TalkBack listening checks on phone and tablet.
+Validation covers the recorded cases, not every device or the frequency of
+exceptional recovery conditions. A new F-Droid binary has not been validated.
 
 ## 0.2.0 - 2026-10-30
 
