@@ -23,6 +23,24 @@ class JsonRoutineStoreTest {
 
         assertEquals(CURRENT_ROUTINE_STORE_FORMAT_VERSION, document.formatVersion)
         assertTrue(document.routines.isEmpty())
+        assertNull(store.loadOrNull())
+        assertTrue(JsonRoutineRepository(store).loadCatalog().userRoutineDocumentMissing)
+    }
+
+    @Test
+    fun readableEmptyDocumentAndLegacyBackupRemainDistinctFromMissingData() {
+        val file = Files.createTempDirectory("vr-routines").resolve("routines.json").toFile()
+        val emptyDocument = """{"formatVersion":3,"routines":[]}"""
+        file.writeText(emptyDocument)
+        val store = JsonRoutineStore(file)
+        val repository = JsonRoutineRepository(store)
+        assertNotNull(store.loadOrNull())
+        assertFalse(repository.loadCatalog().userRoutineDocumentMissing)
+        assertEquals(emptyDocument, file.readText())
+
+        assertTrue(file.renameTo(File("${file.path}.bak")))
+        assertFalse(repository.loadCatalog().userRoutineDocumentMissing)
+        assertEquals(emptyDocument, file.readText())
     }
 
     @Test

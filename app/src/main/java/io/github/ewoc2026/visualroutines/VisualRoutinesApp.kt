@@ -59,6 +59,7 @@ internal fun VisualRoutinesApp(
                 is RestorableEditorScreen.Create -> state.openCreateRoutine(
                     draft = editorScreen.draft,
                     returnDestination = editorScreen.returnDestination,
+                    routineId = editorScreen.routineId,
                 )
                 is RestorableEditorScreen.Edit -> state.openEditRoutine(editorScreen.routineId)
                 null -> Unit

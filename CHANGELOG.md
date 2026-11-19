@@ -2,6 +2,26 @@
 
 All notable user-visible changes are recorded here.
 
+## Unreleased
+
+### Fixed
+
+- Keep a new routine's identity when restoring its editor after an uncertain
+  save, so retrying the save updates that routine instead of creating a duplicate.
+- Preserve stored image copies when recovery is uncertain, including when the
+  routine catalog is missing and new routines are later saved. Normal successful
+  removal of an image's last saved reference still permits deletion after editing
+  finishes. Uncertain copies may remain until app storage is cleared or the app
+  is uninstalled.
+- Ignore wrongly typed saved progress during startup so intact routines remain
+  accessible, without clearing the stored progress snapshot.
+
+These changes are available in source only and are not included in version
+0.2.0. Codex reproduced the synthetic failure cases, implemented the corrections,
+and ran automated tests and focused Pixel 9a recovery checks. This does not
+establish how often these exceptional conditions occur in normal use or validate
+a new F-Droid binary.
+
 ## 0.2.0 - 2026-10-30
 
 ### Added

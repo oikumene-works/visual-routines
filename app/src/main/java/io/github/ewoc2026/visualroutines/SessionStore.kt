@@ -19,6 +19,15 @@ internal class SharedPreferencesSessionStore(context: Context) : SessionStore {
     private val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     override fun load(routines: List<Routine>): ActiveSession? {
+        return try {
+            readSession(routines)
+        } catch (_: ClassCastException) {
+            // Invalid preference types must not block startup or erase the stored snapshot.
+            null
+        }
+    }
+
+    private fun readSession(routines: List<Routine>): ActiveSession? {
         val routineId = preferences.getString(KEY_ROUTINE_ID, null) ?: return null
         val routine = routines.find { it.id == routineId } ?: return null
         val currentStepId = preferences.getString(KEY_CURRENT_STEP_ID, null)

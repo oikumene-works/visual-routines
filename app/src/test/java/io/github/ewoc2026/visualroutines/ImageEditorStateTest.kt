@@ -88,6 +88,7 @@ class ImageEditorStateTest {
         val create = RestorableEditorScreen.Create(
             draft = prefilledCreateRoutineDraft,
             returnDestination = CreateRoutineReturnDestination.ManageRoutines,
+            routineId = "33333333-3333-4333-8333-333333333333",
         )
         val edit = RestorableEditorScreen.Edit(
             routineId = "11111111-1111-4111-8111-111111111111",
@@ -110,6 +111,21 @@ class ImageEditorStateTest {
         assertEquals(create, decodeEditorScreen(encodeEditorScreen(create)))
         assertEquals(edit, decodeEditorScreen(encodeEditorScreen(edit)))
         assertNull(decodeEditorScreen(listOf("editor-screen-v1", "create")))
+    }
+
+    @Test
+    fun legacyEditorRouteKeepsItsDraftAndGainsAStableCreateIdentity() {
+        val legacy = listOf(
+            "editor-screen-v1", "create", "", "ManageRoutines", "My draft",
+            "0", "", "Take the cloth.", "0", "", "0", "", "", "", "0", "",
+        )
+        val restored = decodeEditorScreen(legacy) as RestorableEditorScreen.Create
+
+        assertEquals(CreateRoutineDraft("My draft", listOf(RoutineStepContent("Take the cloth."))), restored.draft)
+        assertEquals(CreateRoutineReturnDestination.ManageRoutines, restored.returnDestination)
+        assertEquals(restored.routineId, java.util.UUID.fromString(restored.routineId).toString())
+        assertEquals(restored, decodeEditorScreen(encodeEditorScreen(restored)))
+        assertNull(decodeEditorScreen(legacy.toMutableList().apply { set(0, "editor-screen-v2") }))
     }
 
     @Test

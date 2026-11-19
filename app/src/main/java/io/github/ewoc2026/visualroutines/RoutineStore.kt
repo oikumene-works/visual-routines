@@ -100,6 +100,7 @@ internal data class RoutineCatalog(
     val routines: List<Routine>,
     val userRoutineIds: Set<String> = emptySet(),
     val userRoutineLoadError: RoutineStoreException? = null,
+    val userRoutineDocumentMissing: Boolean = false,
 )
 
 internal data class RoutineStepContent(
@@ -165,7 +166,12 @@ internal class JsonRoutineRepository(
 ) : RoutineRepository {
     override fun loadCatalog(): RoutineCatalog {
         return try {
-            catalogFor(store.load())
+            val document = store.loadOrNull()
+            if (document == null) {
+                RoutineCatalog(bundledRoutines, userRoutineDocumentMissing = true)
+            } else {
+                catalogFor(document)
+            }
         } catch (error: RoutineStoreException) {
             RoutineCatalog(bundledRoutines, userRoutineLoadError = error)
         }
@@ -301,7 +307,10 @@ internal class JsonRoutineStore(
         documentDescription = file.path,
     )
 
-    fun load(): StoredRoutineDocument {
+    fun load(): StoredRoutineDocument = loadOrNull() ?: StoredRoutineDocument()
+
+    /** Distinguishes absent data from a valid empty document without changing missing-as-empty reads. */
+    fun loadOrNull(): StoredRoutineDocument? {
         return try {
             val currentBytes = documentIo.readOrReplace { existingBytes ->
                 val decoded = decodeVersioned(existingBytes)
@@ -311,7 +320,7 @@ internal class JsonRoutineStore(
                     null
                 }
             }
-            decodeVersioned(currentBytes).document
+            currentBytes?.let { decodeVersioned(it).document }
         } catch (error: AtomicDocumentIoException) {
             throw RoutineStoreException("Could not read routine store: $documentDescription", error)
         }
