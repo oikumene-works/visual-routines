@@ -78,11 +78,12 @@ internal class VisualRoutinesState(
     fun openCreateRoutine(
         draft: CreateRoutineDraft = CreateRoutineDraft(),
         returnDestination: CreateRoutineReturnDestination = CreateRoutineReturnDestination.Home,
+        routineId: String = UUID.randomUUID().toString(),
     ) {
         if (!homeSettings.allowRoutineEditing) return
-        pendingCreateRoutineId = UUID.randomUUID().toString()
+        pendingCreateRoutineId = routineId
         dialog = null
-        screen = AppScreen.CreateRoutine(draft, returnDestination)
+        screen = AppScreen.CreateRoutine(draft, returnDestination, routineId)
     }
 
     fun openCreateRoutineFromManage() {
@@ -489,6 +490,7 @@ internal sealed interface AppScreen {
     data class CreateRoutine(
         val draft: CreateRoutineDraft = CreateRoutineDraft(),
         val returnDestination: CreateRoutineReturnDestination = CreateRoutineReturnDestination.Home,
+        val routineId: String,
     ) : AppScreen
     data class EditRoutine(
         val routineId: String,

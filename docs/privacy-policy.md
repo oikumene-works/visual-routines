@@ -4,7 +4,9 @@ Effective date: 2026-10-30
 
 ## Scope
 
-This policy describes Visual Routines version 0.2.0 and how the app works now.
+This policy describes the released Visual Routines version 0.2.0. The separate
+[unreleased retention change](#unreleased-image-retention-change) below describes
+development source and does not change the behavior of the installed 0.2.0 app.
 
 ## Data Stored On Your Device
 
@@ -51,6 +53,20 @@ device.
 Android's app sandbox protects the app-private files from ordinary access by
 other apps. Visual Routines does not add its own encryption, so do not use
 routine text as a secure vault for confidential information.
+
+## Unreleased Image-Retention Change
+
+The development source keeps stored image copies when their recovery status is
+uncertain, including when the routine list is empty or new routines are saved.
+An image copy can be removed after a successful change removes its last saved
+reference and no editing draft needs it. Abandoned draft copies are removed.
+Uncertain copies can occupy storage indefinitely; clearing app storage or
+uninstalling removes all app-private copies. Original images are unaffected.
+
+This change is not part of released version 0.2.0 and has no release effective
+date yet. The policy and in-app disclosure will be reconciled for the next
+app release. Codex prepared this description from the implementation and
+synthetic recovery-test results.
 
 ## Future Changes
 

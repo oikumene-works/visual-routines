@@ -80,7 +80,7 @@ class ImportedImageStoreTest {
         assertNotNull(restarted.decode(id, 400))
     }
 
-    @Test fun failedSaveAndRestoredDraftKeepBothOldAndNewImagesUntilExplicitExit() {
+    @Test fun failedSaveAndRestoredDraftKeepPublishedCopiesEvenAfterExit() {
         store.beginDraft(draft, emptySet())
         val oldId = store.importImage(draft) { source().inputStream() }
         store.prepareForSave(setOf(oldId))
@@ -99,7 +99,7 @@ class ImportedImageStoreTest {
         restarted.finishDraft(nextDraft) // Cancel the edit after process recreation.
         restarted.collect(catalog(oldId))
         assertNotNull(restarted.decode(oldId, 400))
-        assertNull(restarted.decode(newId, 400))
+        assertNotNull(restarted.decode(newId, 400))
     }
 
     @Test fun deletingLastReferenceCollectsImageButAnotherRoutineProtectsIt() {
@@ -109,7 +109,7 @@ class ImportedImageStoreTest {
         store.finishDraft(draft)
         store.collect(catalog(id))
         assertNotNull(store.decode(id, 400))
-        store.collect(RoutineCatalog(emptyList()))
+        store.collectAfterMutation(catalog(id), RoutineCatalog(emptyList()))
         assertNull(store.decode(id, 400))
     }
 

@@ -390,6 +390,25 @@ class VisualRoutinesStateTest {
     }
 
     @Test
+    fun aNewEditorDoesNotReuseTheIdentityOfACancelledOrSavedDraft() {
+        val repository = FakeRoutineRepository(RoutineCatalog(BundledRoutines.all)).apply {
+            createFailuresRemaining = 1
+        }
+        val state = VisualRoutinesState(FakeSessionStore(), repository)
+        val steps = listOf(RoutineStepContent("Take the cloth."))
+        state.openCreateRoutine()
+        assertFalse(state.createRoutine("Cancelled draft", steps))
+        state.cancelCreateRoutine()
+
+        state.openCreateRoutine()
+        assertTrue(state.createRoutine("First saved routine", steps))
+        state.openCreateRoutine()
+        assertTrue(state.createRoutine("Second saved routine", steps))
+
+        assertEquals(3, repository.createdRoutineIds.toSet().size)
+    }
+
+    @Test
     fun openingCreateRoutineCanCarryPrefilledDraft() {
         val state = VisualRoutinesState(FakeSessionStore())
         val draft = CreateRoutineDraft(
@@ -402,7 +421,10 @@ class VisualRoutinesStateTest {
 
         state.openCreateRoutine(draft)
 
-        assertEquals(AppScreen.CreateRoutine(draft), state.screen)
+        val screen = state.screen as AppScreen.CreateRoutine
+        assertEquals(draft, screen.draft)
+        assertEquals(CreateRoutineReturnDestination.Home, screen.returnDestination)
+        assertTrue(screen.routineId.isUuidLikeForTest())
     }
 
     @Test
@@ -413,6 +435,7 @@ class VisualRoutinesStateTest {
             routineRepository = repository,
         )
         state.openCreateRoutine()
+        val editor = state.screen
 
         val created = state.createRoutine(
             "Change bed linen",
@@ -423,7 +446,7 @@ class VisualRoutinesStateTest {
         )
 
         assertEquals(false, created)
-        assertEquals(AppScreen.CreateRoutine(), state.screen)
+        assertEquals(editor, state.screen)
         assertNull(repository.createdTitle)
     }
 
@@ -435,6 +458,7 @@ class VisualRoutinesStateTest {
             routineRepository = repository,
         )
         state.openCreateRoutine()
+        val editor = state.screen
 
         val created = state.createRoutine(
             "Change bed linen",
@@ -442,7 +466,7 @@ class VisualRoutinesStateTest {
         )
 
         assertEquals(false, created)
-        assertEquals(AppScreen.CreateRoutine(), state.screen)
+        assertEquals(editor, state.screen)
         assertNull(repository.createdTitle)
     }
 

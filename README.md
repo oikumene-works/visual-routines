@@ -16,6 +16,11 @@ the preferred APK channel. It was added to F-Droid on 2026-11-01.
 An untagged commit or development APK is not a release.
 This repository does not publish APKs or Android App Bundles.
 
+Recovery corrections listed under [Unreleased](CHANGELOG.md#unreleased) are
+available in source and are not part of the released 0.2.0 app. No new app
+release accompanies that source update. Codex implemented and tested the
+corrections; the changelog records the validation scope and limits.
+
 ## Features
 
 - Create, edit, reorder, and delete routines stored on the device.

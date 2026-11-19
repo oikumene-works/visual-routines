@@ -23,6 +23,7 @@ internal sealed interface RestorableEditorScreen {
     data class Create(
         override val draft: CreateRoutineDraft,
         val returnDestination: CreateRoutineReturnDestination,
+        val routineId: String,
     ) : RestorableEditorScreen
 
     data class Edit(
@@ -33,7 +34,8 @@ internal sealed interface RestorableEditorScreen {
 
 private const val EDITOR_STEPS_SAVER_VERSION = "editor-steps-v2"
 private const val EDITOR_STEP_SAVED_FIELD_COUNT = 10
-private const val EDITOR_SCREEN_SAVER_VERSION = "editor-screen-v1"
+private const val EDITOR_SCREEN_SAVER_VERSION = "editor-screen-v2"
+private const val LEGACY_EDITOR_SCREEN_SAVER_VERSION = "editor-screen-v1"
 private const val ROUTINE_STEP_CONTENT_SAVED_FIELD_COUNT = 11
 private const val CREATE_EDITOR_SCREEN = "create"
 private const val EDIT_EDITOR_SCREEN = "edit"
@@ -110,7 +112,8 @@ internal fun encodeEditorScreen(screen: RestorableEditorScreen): List<String> {
         when (screen) {
             is RestorableEditorScreen.Create -> {
                 add(CREATE_EDITOR_SCREEN)
-                add("")
+                // A retry must address the same routine even if the previous write took effect.
+                add(screen.routineId)
                 add(screen.returnDestination.name)
             }
             is RestorableEditorScreen.Edit -> {
@@ -137,7 +140,9 @@ internal fun encodeEditorScreen(screen: RestorableEditorScreen): List<String> {
 }
 
 internal fun decodeEditorScreen(savedScreen: List<String>): RestorableEditorScreen? {
-    if (savedScreen.size < 5 || savedScreen[0] != EDITOR_SCREEN_SAVER_VERSION) return null
+    if (savedScreen.size < 5) return null
+    val legacy = savedScreen[0] == LEGACY_EDITOR_SCREEN_SAVER_VERSION
+    if (!legacy && savedScreen[0] != EDITOR_SCREEN_SAVER_VERSION) return null
     val fields = savedScreen.drop(5)
     if (
         fields.isEmpty() ||
@@ -174,6 +179,9 @@ internal fun decodeEditorScreen(savedScreen: List<String>): RestorableEditorScre
             draft = draft,
             returnDestination = enumValueOrNull<CreateRoutineReturnDestination>(savedScreen[3])
                 ?: return null,
+            // Older saved editors have no create identity to recover.
+            routineId = if (legacy) UUID.randomUUID().toString()
+                else savedScreen[2].takeIf { it.isNotEmpty() } ?: return null,
         )
         EDIT_EDITOR_SCREEN -> savedScreen[2]
             .takeIf { it.isNotEmpty() }
@@ -189,7 +197,7 @@ internal fun decodeEditorScreen(savedScreen: List<String>): RestorableEditorScre
 
 internal fun AppScreen.restorableEditorScreenOrNull(): RestorableEditorScreen? {
     return when (this) {
-        is AppScreen.CreateRoutine -> RestorableEditorScreen.Create(draft, returnDestination)
+        is AppScreen.CreateRoutine -> RestorableEditorScreen.Create(draft, returnDestination, routineId)
         is AppScreen.EditRoutine -> RestorableEditorScreen.Edit(routineId, draft)
         else -> null
     }
@@ -197,7 +205,7 @@ internal fun AppScreen.restorableEditorScreenOrNull(): RestorableEditorScreen? {
 
 internal fun RestorableEditorScreen.toAppScreen(): AppScreen {
     return when (this) {
-        is RestorableEditorScreen.Create -> AppScreen.CreateRoutine(draft, returnDestination)
+        is RestorableEditorScreen.Create -> AppScreen.CreateRoutine(draft, returnDestination, routineId)
         is RestorableEditorScreen.Edit -> AppScreen.EditRoutine(routineId, draft)
     }
 }

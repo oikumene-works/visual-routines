@@ -26,6 +26,7 @@ internal class ImportedImageStore(
 ) {
     private var recovered = false
     private val activeDrafts = mutableSetOf<String>()
+    private val pendingCollectionIds = mutableSetOf<String>()
 
     /** Reconciles the single main editor's restored draft once per process. */
     @Synchronized
@@ -189,12 +190,41 @@ internal class ImportedImageStore(
         if (isAssetId(draftId)) File(draftsDirectory, draftId).deleteRecursively()
     }
 
-    /** On an unreadable catalog or lease, retain assets instead of guessing. */
+    /**
+     * Records deletion evidence only after a successful routine mutation. Losing
+     * this process-local evidence leaves extra copies instead of risking recovery.
+     */
+    @Synchronized
+    fun collectAfterMutation(before: RoutineCatalog, after: RoutineCatalog) {
+        if (before.userRoutineLoadError != null || after.userRoutineLoadError != null ||
+            before.userRoutineDocumentMissing || after.userRoutineDocumentMissing) {
+            pendingCollectionIds.clear()
+            return
+        }
+        pendingCollectionIds += importedIds(before) - importedIds(after)
+        collect(after)
+    }
+
+    /** Invalidates stale deletion evidence even when a read does not trigger collection. */
+    @Synchronized
+    fun observeCatalog(catalog: RoutineCatalog) {
+        if (catalog.userRoutineLoadError != null || catalog.userRoutineDocumentMissing) {
+            pendingCollectionIds.clear()
+        } else {
+            pendingCollectionIds.removeAll(importedIds(catalog))
+        }
+    }
+
+    /**
+     * Deletes only copies whose last known reference a confirmed mutation removed.
+     * Unknown files survive even a readable empty catalog; draft leases defer
+     * known removals until editor exit. Unreadable data never authorizes deletion.
+     */
     @Synchronized
     fun collect(catalog: RoutineCatalog) {
-        if (catalog.userRoutineLoadError != null) return
-        val retained = catalog.routines.flatMap { it.steps }.mapNotNull { it.image }
-            .filter { it.source == RoutineImageSource.IMPORTED }.mapTo(mutableSetOf()) { it.assetId }
+        observeCatalog(catalog)
+        if (pendingCollectionIds.isEmpty()) return
+        val retained = importedIds(catalog).toMutableSet()
         try {
             val draftDirectories = if (draftsDirectory.exists()) draftsDirectory.listFiles() ?: return else emptyArray()
             for (draft in draftDirectories.filter { it.isDirectory }) {
@@ -204,9 +234,17 @@ internal class ImportedImageStore(
                 retained += draft.listFiles().orEmpty().filter { it.extension == "png" }.map { it.nameWithoutExtension }
             }
         } catch (_: IOException) { return }
-        imagesDirectory.listFiles()?.filter { it.isFile && isAssetId(it.nameWithoutExtension) }
-            ?.filter { it.nameWithoutExtension !in retained }?.forEach { it.delete() }
+        imagesDirectory.listFiles()?.filter {
+            it.isFile && it.extension == "png" && isAssetId(it.nameWithoutExtension) &&
+                it.nameWithoutExtension in pendingCollectionIds && it.nameWithoutExtension !in retained
+        }?.forEach { file ->
+            if (file.delete()) pendingCollectionIds -= file.nameWithoutExtension
+        }
     }
+
+    private fun importedIds(catalog: RoutineCatalog): Set<String> =
+        catalog.routines.flatMap { it.steps }.mapNotNull { it.image }
+            .filter { it.source == RoutineImageSource.IMPORTED }.mapTo(mutableSetOf()) { it.assetId }
 
     /** A bounded decode; missing or damaged files resolve to text-only content. */
     @Synchronized
@@ -269,7 +307,9 @@ internal class ImageRoutineRepository(
     private val delegate: RoutineRepository,
     private val images: ImportedImageStore,
 ) : RoutineRepository {
-    override fun loadCatalog(): RoutineCatalog = synchronized(images) { delegate.loadCatalog() }
+    override fun loadCatalog(): RoutineCatalog = synchronized(images) {
+        delegate.loadCatalog().also(images::observeCatalog)
+    }
     override fun createRoutine(routineId: String, title: String, steps: List<RoutineStepContent>): RoutineCatalog =
         mutate(steps) { delegate.createRoutine(routineId, title, steps) }
     override fun updateRoutine(routineId: String, title: String, steps: List<RoutineStepContent>): RoutineCatalog =
@@ -279,12 +319,13 @@ internal class ImageRoutineRepository(
         mutate(emptyList()) { delegate.reorderUserRoutines(routineIds) }
 
     private fun mutate(steps: List<RoutineStepContent>, action: () -> RoutineCatalog): RoutineCatalog = synchronized(images) {
+        val before = loadCatalog()
         try {
             images.prepareForSave(steps.mapNotNull { it.image }
                 .filter { it.source == RoutineImageSource.IMPORTED }.mapTo(mutableSetOf()) { it.assetId })
         } catch (_: ImageImportException) {
             throw RoutineStoreException("Could not retain the selected image.")
         }
-        action().also(images::collect)
+        action().also { after -> images.collectAfterMutation(before, after) }
     }
 }
