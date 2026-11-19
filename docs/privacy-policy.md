@@ -1,12 +1,11 @@
 # Visual Routines Privacy Policy
 
-Effective date: 2026-10-30
+Policy date: 2026-11-19
 
 ## Scope
 
-This policy describes the released Visual Routines version 0.2.0. The separate
-[unreleased retention change](#unreleased-image-retention-change) below describes
-development source and does not change the behavior of the installed 0.2.0 app.
+This policy describes Visual Routines version 0.3.0. The [0.2.0 policy](https://github.com/oikumene-works/visual-routines/blob/v0.2.0/docs/privacy-policy.md)
+continues to describe the released 0.2.0 app.
 
 ## Data Stored On Your Device
 
@@ -39,10 +38,12 @@ transfer; the app does not send the data to the Visual Routines project.
 A routine remains on the device until you delete it in the app, clear the
 app's storage, or uninstall the app. Active progress remains until you complete
 or reset it, replace it after confirmation, clear app storage, or uninstall.
-Unused image copies are removed after successful changes or abandoned editing.
-Copies needed by a saved routine or a restorable draft are retained. Clearing
-app storage or uninstalling also removes these copies. Original images outside
-the app are unaffected.
+An image copy can be removed after a successful change removes its last saved
+reference and no editing draft needs it. Abandoned draft copies are removed.
+Other saved copies are kept when their recovery status is uncertain, even if
+the routine list is empty or new routines are saved. Uncertain copies can occupy
+storage indefinitely. Clearing app storage or uninstalling removes all
+app-private copies. Original images outside the app are unaffected.
 
 Settings remain until you change them, clear app storage, or uninstall. Data
 already transferred to another device must be removed separately on that
@@ -53,20 +54,6 @@ device.
 Android's app sandbox protects the app-private files from ordinary access by
 other apps. Visual Routines does not add its own encryption, so do not use
 routine text as a secure vault for confidential information.
-
-## Unreleased Image-Retention Change
-
-The development source keeps stored image copies when their recovery status is
-uncertain, including when the routine list is empty or new routines are saved.
-An image copy can be removed after a successful change removes its last saved
-reference and no editing draft needs it. Abandoned draft copies are removed.
-Uncertain copies can occupy storage indefinitely; clearing app storage or
-uninstalling removes all app-private copies. Original images are unaffected.
-
-This change is not part of released version 0.2.0 and has no release effective
-date yet. The policy and in-app disclosure will be reconciled for the next
-app release. Codex prepared this description from the implementation and
-synthetic recovery-test results.
 
 ## Future Changes
 
@@ -87,3 +74,5 @@ guaranteed. This is not an emergency or security service.
 
 Project information and the private vulnerability-reporting route are at
 <https://github.com/oikumene-works/visual-routines>.
+
+Codex prepared this policy from the app implementation and validation records.

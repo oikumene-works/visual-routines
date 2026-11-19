@@ -2,6 +2,8 @@ package io.github.ewoc2026.visualroutines
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.drawable.RippleDrawable
 import android.net.Uri
 import android.graphics.Typeface
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -17,19 +19,26 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -64,9 +73,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -132,7 +143,7 @@ internal fun EditRoutineScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun RoutineEditorScreen(
     draft: CreateRoutineDraft,
@@ -163,6 +174,7 @@ private fun RoutineEditorScreen(
     var displayedEditorFeedback by remember { mutableStateOf<EditorFeedback?>(null) }
     var editorFeedbackToken by remember { mutableIntStateOf(0) }
     val editorScrollState = rememberScrollState()
+    val imeVisible = WindowInsets.isImeVisible
     val canSave = !importBusy && routineName.isNotBlank() &&
         editorSteps.isNotEmpty() &&
         editorSteps.all(EditorStep::canSave)
@@ -358,6 +370,7 @@ private fun RoutineEditorScreen(
         },
         modifier = Modifier
             .statusBarsPadding()
+            .imePadding()
             .semantics { isTraversalGroup = true },
     ) { padding ->
         ScreenSurface(
@@ -366,238 +379,253 @@ private fun RoutineEditorScreen(
                 .semantics { traversalIndex = 1f },
             applySystemBarsPadding = false,
             applyTopContentPadding = false,
+            // Short landscape windows need this space for the line being edited.
+            applyBottomContentPadding = !imeVisible,
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-            ) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                // Bound the field to the available viewport so long text can
+                // scroll internally while the parent keeps the field visible.
+                val density = LocalDensity.current
+                val lineHeight = with(density) { MaterialTheme.typography.bodyLarge.lineHeight.toDp() }
+                val labelHeight = with(density) { MaterialTheme.typography.bodySmall.lineHeight.toDp() }
+                val feedbackHeight = if (displayedEditorFeedback == null) 0.dp else 24.dp
+                val maxFieldLines = if (imeVisible) {
+                    ((maxHeight - feedbackHeight - labelHeight - 32.dp) / lineHeight).toInt().coerceAtLeast(1)
+                } else Int.MAX_VALUE
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(editorScrollState)
-                        .padding(top = 28.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    OutlinedTextField(
-                        value = routineName,
-                        onValueChange = { routineName = it },
-                        label = { Text(stringResource(R.string.routine_name_label)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text(
-                        text = stringResource(R.string.steps_heading, editorSteps.size),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.semantics { heading() },
-                    )
-                    editorSteps.forEachIndexed { index, editorStep ->
-                        key(editorStep.id) {
-                            StepEditorRow(
-                                stepNumber = index + 1,
-                                instruction = editorStep.instruction,
-                                note = editorStep.note,
-                                image = editorStep.image,
-                                canMoveUp = index > 0,
-                                canMoveDown = index < editorSteps.lastIndex,
-                                canDelete = editorSteps.size > 1,
-                                onInstructionChange = { updated ->
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(instruction = updated)
-                                    }
-                                },
-                                onNoteChange = { updated ->
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(note = updated)
-                                    }
-                                },
-                                onAddNote = {
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(note = "")
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            R.string.step_note_added_announcement,
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onRemoveNote = {
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(note = null)
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            R.string.step_note_removed_announcement,
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onAddImage = {
-                                    chooserStepId = editorStep.id
-                                },
-                                onReplaceImage = {
-                                    chooserStepId = editorStep.id
-                                },
-                                onRemoveImage = {
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(image = null)
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            R.string.step_image_removed_announcement,
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onImageRoleChange = { semanticRole ->
-                                    editorSteps = editorSteps.updated(index) {
-                                        val image = requireNotNull(it.image)
-                                        it.copy(
-                                            image = image.copy(
-                                                semanticRole = semanticRole,
-                                                descriptionOverride = image.descriptionOverride
-                                                    ?.takeUnless { description ->
-                                                        semanticRole == RoutineImageSemanticRole.REDUNDANT &&
-                                                            description.isBlank()
-                                                    },
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("routine-editor-scroll")
+                            .verticalScroll(editorScrollState)
+                            .padding(top = 28.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = routineName,
+                            onValueChange = { routineName = it },
+                            label = { Text(stringResource(R.string.routine_name_label)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Text(
+                            text = stringResource(R.string.steps_heading, editorSteps.size),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        editorSteps.forEachIndexed { index, editorStep ->
+                            key(editorStep.id) {
+                                StepEditorRow(
+                                    maxFieldLines = maxFieldLines,
+                                    stepNumber = index + 1,
+                                    instruction = editorStep.instruction,
+                                    note = editorStep.note,
+                                    image = editorStep.image,
+                                    canMoveUp = index > 0,
+                                    canMoveDown = index < editorSteps.lastIndex,
+                                    canDelete = editorSteps.size > 1,
+                                    onInstructionChange = { updated ->
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(instruction = updated)
+                                        }
+                                    },
+                                    onNoteChange = { updated ->
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(note = updated)
+                                        }
+                                    },
+                                    onAddNote = {
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(note = "")
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                R.string.step_note_added_announcement,
+                                                index + 1,
                                             ),
                                         )
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            when (semanticRole) {
-                                                RoutineImageSemanticRole.INFORMATIVE ->
-                                                    R.string.step_image_described_announcement
-                                                RoutineImageSemanticRole.REDUNDANT ->
-                                                    R.string.step_image_not_described_announcement
-                                            },
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onAddDescriptionOverride = {
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(
-                                            image = requireNotNull(it.image).copy(
-                                                descriptionOverride = "",
+                                    },
+                                    onRemoveNote = {
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(note = null)
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                R.string.step_note_removed_announcement,
+                                                index + 1,
                                             ),
                                         )
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            R.string.step_image_description_added_announcement,
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onDescriptionOverrideChange = { description ->
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(
-                                            image = requireNotNull(it.image).copy(
-                                                descriptionOverride = description,
+                                    },
+                                    onAddImage = {
+                                        chooserStepId = editorStep.id
+                                    },
+                                    onReplaceImage = {
+                                        chooserStepId = editorStep.id
+                                    },
+                                    onRemoveImage = {
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(image = null)
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                R.string.step_image_removed_announcement,
+                                                index + 1,
                                             ),
                                         )
-                                    }
-                                },
-                                onRemoveDescriptionOverride = {
-                                    editorSteps = editorSteps.updated(index) {
-                                        it.copy(
-                                            image = requireNotNull(it.image).copy(
-                                                descriptionOverride = null,
+                                    },
+                                    onImageRoleChange = { semanticRole ->
+                                        editorSteps = editorSteps.updated(index) {
+                                            val image = requireNotNull(it.image)
+                                            it.copy(
+                                                image = image.copy(
+                                                    semanticRole = semanticRole,
+                                                    descriptionOverride = image.descriptionOverride
+                                                        ?.takeUnless { description ->
+                                                            semanticRole == RoutineImageSemanticRole.REDUNDANT &&
+                                                                description.isBlank()
+                                                        },
+                                                ),
+                                            )
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                when (semanticRole) {
+                                                    RoutineImageSemanticRole.INFORMATIVE ->
+                                                        R.string.step_image_described_announcement
+                                                    RoutineImageSemanticRole.REDUNDANT ->
+                                                        R.string.step_image_not_described_announcement
+                                                },
+                                                index + 1,
                                             ),
                                         )
-                                    }
-                                    publishEditorFeedback(
-                                        resources.getString(
-                                            R.string.step_image_description_removed_announcement,
-                                            index + 1,
-                                        ),
-                                    )
-                                },
-                                onMoveUp = {
-                                    editorSteps = editorSteps.moved(index, index - 1)
-                                    publishEditorFeedback(stepMovedUpAnnouncement)
-                                },
-                                onMoveDown = {
-                                    editorSteps = editorSteps.moved(index, index + 1)
-                                    publishEditorFeedback(stepMovedDownAnnouncement)
-                                },
-                                onDelete = {
-                                    editorSteps = editorSteps.toMutableList().also { it.removeAt(index) }
-                                    publishEditorFeedback(
-                                        resources.getQuantityString(
-                                            R.plurals.step_deleted_announcement,
-                                            editorSteps.size,
-                                            index + 1,
-                                            editorSteps.size,
-                                        ),
-                                    )
-                                },
+                                    },
+                                    onAddDescriptionOverride = {
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(
+                                                image = requireNotNull(it.image).copy(
+                                                    descriptionOverride = "",
+                                                ),
+                                            )
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                R.string.step_image_description_added_announcement,
+                                                index + 1,
+                                            ),
+                                        )
+                                    },
+                                    onDescriptionOverrideChange = { description ->
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(
+                                                image = requireNotNull(it.image).copy(
+                                                    descriptionOverride = description,
+                                                ),
+                                            )
+                                        }
+                                    },
+                                    onRemoveDescriptionOverride = {
+                                        editorSteps = editorSteps.updated(index) {
+                                            it.copy(
+                                                image = requireNotNull(it.image).copy(
+                                                    descriptionOverride = null,
+                                                ),
+                                            )
+                                        }
+                                        publishEditorFeedback(
+                                            resources.getString(
+                                                R.string.step_image_description_removed_announcement,
+                                                index + 1,
+                                            ),
+                                        )
+                                    },
+                                    onMoveUp = {
+                                        editorSteps = editorSteps.moved(index, index - 1)
+                                        publishEditorFeedback(stepMovedUpAnnouncement)
+                                    },
+                                    onMoveDown = {
+                                        editorSteps = editorSteps.moved(index, index + 1)
+                                        publishEditorFeedback(stepMovedDownAnnouncement)
+                                    },
+                                    onDelete = {
+                                        editorSteps = editorSteps.toMutableList().also { it.removeAt(index) }
+                                        publishEditorFeedback(
+                                            resources.getQuantityString(
+                                                R.plurals.step_deleted_announcement,
+                                                editorSteps.size,
+                                                index + 1,
+                                                editorSteps.size,
+                                            ),
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                val addedStep = EditorStep(instruction = "")
+                                editorSteps = editorSteps + addedStep
+                                publishEditorFeedback(
+                                    resources.getString(
+                                        R.string.step_added_announcement,
+                                        editorSteps.size,
+                                    ),
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .sizeIn(minHeight = 52.dp),
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Text(
+                                text = stringResource(R.string.add_step_action),
+                                modifier = Modifier.padding(start = 8.dp),
                             )
                         }
+                        Spacer(Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                if (onSave(routineName, editorSteps.map(EditorStep::toRoutineStepContent))) {
+                                    imageStore?.finishDraft(imageDraftId)
+                                    application?.let { imageStore?.collect(it.routineRepository.loadCatalog()) }
+                                }
+                            },
+                            enabled = canSave,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .sizeIn(minHeight = 56.dp),
+                        ) {
+                            Text(stringResource(R.string.save_action))
+                        }
+                        OutlinedButton(
+                            onClick = ::exitEditor,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .sizeIn(minHeight = 52.dp),
+                        ) {
+                            Text(stringResource(R.string.cancel_action))
+                        }
                     }
-                    OutlinedButton(
-                        onClick = {
-                            val addedStep = EditorStep(instruction = "")
-                            editorSteps = editorSteps + addedStep
-                            publishEditorFeedback(
-                                resources.getString(
-                                    R.string.step_added_announcement,
-                                    editorSteps.size,
-                                ),
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(if (imeVisible && displayedEditorFeedback == null) 0.dp else 24.dp)
+                            .clearAndSetSemantics {
+                                liveRegion = LiveRegionMode.Assertive
+                                displayedEditorFeedback?.let { feedback ->
+                                    contentDescription = feedback.message
+                                }
+                            },
+                    ) {
+                        displayedEditorFeedback?.let { feedback ->
+                            Text(
+                                text = feedback.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .sizeIn(minHeight = 52.dp),
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Text(
-                            text = stringResource(R.string.add_step_action),
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Button(
-                        onClick = {
-                            if (onSave(routineName, editorSteps.map(EditorStep::toRoutineStepContent))) {
-                                imageStore?.finishDraft(imageDraftId)
-                                application?.let { imageStore?.collect(it.routineRepository.loadCatalog()) }
-                            }
-                        },
-                        enabled = canSave,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .sizeIn(minHeight = 56.dp),
-                    ) {
-                        Text(stringResource(R.string.save_action))
-                    }
-                    OutlinedButton(
-                        onClick = ::exitEditor,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .sizeIn(minHeight = 52.dp),
-                    ) {
-                        Text(stringResource(R.string.cancel_action))
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(24.dp)
-                        .clearAndSetSemantics {
-                            liveRegion = LiveRegionMode.Assertive
-                            displayedEditorFeedback?.let { feedback ->
-                                contentDescription = feedback.message
-                            }
-                        },
-                ) {
-                    displayedEditorFeedback?.let { feedback ->
-                        Text(
-                            text = feedback.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        }
                     }
                 }
             }
@@ -607,6 +635,7 @@ private fun RoutineEditorScreen(
 
 @Composable
 private fun StepEditorRow(
+    maxFieldLines: Int,
     stepNumber: Int,
     instruction: String,
     note: String?,
@@ -633,18 +662,18 @@ private fun StepEditorRow(
     val moveDownText = stringResource(R.string.move_step_down_action)
     val deleteText = stringResource(R.string.delete_step_action)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
+        EditorTextField(
             value = instruction,
             onValueChange = onInstructionChange,
-            label = { Text(stringResource(R.string.step_instruction_label, stepNumber)) },
-            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.step_instruction_label, stepNumber),
+            maxLines = maxFieldLines,
         )
         note?.let {
-            OutlinedTextField(
+            EditorTextField(
                 value = it,
                 onValueChange = onNoteChange,
-                label = { Text(stringResource(R.string.step_note_label, stepNumber)) },
-                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.step_note_label, stepNumber),
+                maxLines = maxFieldLines,
             )
         }
         FlowRow(
@@ -717,6 +746,7 @@ private fun StepEditorRow(
         }
         image?.let {
             StepImageEditor(
+                maxFieldLines = maxFieldLines,
                 stepNumber = stepNumber,
                 image = it,
                 onReplaceImage = onReplaceImage,
@@ -738,6 +768,12 @@ private fun AccessibilityRestoringTextButton(
 ) {
     val textColor = MaterialTheme.colorScheme.primary.toArgb()
     val textSize = MaterialTheme.typography.labelLarge.fontSize.value
+    val rippleColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).toArgb()
+    // The platform light-theme highlight can disappear on black. Update this
+    // drawable without replacing the native view that owns accessibility focus.
+    val ripple = remember(rippleColor) {
+        RippleDrawable(ColorStateList.valueOf(rippleColor), null, null)
+    }
 
     AndroidView(
         factory = { context ->
@@ -749,6 +785,7 @@ private fun AccessibilityRestoringTextButton(
         },
         modifier = modifier,
         update = { button ->
+            button.background = ripple
             button.text = text
             button.setTextColor(textColor)
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
@@ -778,6 +815,7 @@ private fun AccessibilityRestoringTextButton(
 
 @Composable
 private fun StepImageEditor(
+    maxFieldLines: Int,
     stepNumber: Int,
     image: EditorStepImage,
     onReplaceImage: () -> Unit,
@@ -899,24 +937,27 @@ private fun StepImageEditor(
                         .testTag("step-$stepNumber-description-action"),
                 )
                 if (image.descriptionOverride != null || image.source == RoutineImageSource.IMPORTED) {
-                    OutlinedTextField(
-                        value = image.descriptionOverride.orEmpty(),
-                        onValueChange = onDescriptionOverrideChange,
-                        label = {
-                            Text(
-                                stringResource(
-                                    R.string.step_image_description_label,
-                                    stepNumber,
-                                ),
-                            )
-                        },
-                        supportingText = {
-                            Text(stringResource(if (image.source == RoutineImageSource.IMPORTED)
-                                R.string.local_image_description_help else R.string.image_description_required))
-                        },
-                        isError = image.descriptionOverride.isNullOrBlank(),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    val descriptionHelp = stringResource(if (image.source == RoutineImageSource.IMPORTED)
+                        R.string.local_image_description_help else R.string.image_description_required)
+                    val descriptionError = image.descriptionOverride.isNullOrBlank()
+                    Column {
+                        EditorTextField(
+                            value = image.descriptionOverride.orEmpty(),
+                            onValueChange = onDescriptionOverrideChange,
+                            label = stringResource(R.string.step_image_description_label, stepNumber),
+                            isError = descriptionError,
+                            maxLines = maxFieldLines,
+                        )
+                        // Help is outside the focus rectangle so bringing the field
+                        // above the IME cannot scroll to the help instead of the text.
+                        Text(
+                            text = descriptionHelp,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (descriptionError) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
+                        )
+                    }
                 } else {
                     Text(
                         text = asset?.let {
@@ -928,6 +969,37 @@ private fun StepImageEditor(
             }
         }
     }
+}
+
+@Composable
+private fun EditorTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    maxLines: Int,
+    isError: Boolean = false,
+) {
+    val requester = remember { BringIntoViewRequester() }
+    var focused by remember { mutableStateOf(false) }
+    LaunchedEffect(value, maxLines, focused) {
+        if (focused) {
+            // Measure the new line/keyboard constraints before requesting scroll.
+            // Otherwise a growing field can leave its last line behind the IME.
+            withFrameNanos { }
+            requester.bringIntoView()
+        }
+    }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        maxLines = maxLines,
+        isError = isError,
+        modifier = Modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(requester)
+            .onFocusChanged { focused = it.isFocused },
+    )
 }
 
 @Composable

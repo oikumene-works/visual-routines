@@ -1,5 +1,6 @@
 package io.github.ewoc2026.visualroutines
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,10 +28,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.ewoc2026.visualroutines.ui.theme.VisualRoutinesTheme
+import io.github.ewoc2026.visualroutines.ui.theme.ThemePalette
+import io.github.ewoc2026.visualroutines.ui.theme.ThemeSystemBars
 
 @Composable
 internal fun VisualRoutinesApp(
     state: VisualRoutinesState,
+    palette: ThemePalette? = null,
 ) {
     var restorableEditorScreen by rememberSaveable(stateSaver = editorScreenSaver) {
         mutableStateOf<RestorableEditorScreen?>(null)
@@ -67,30 +72,41 @@ internal fun VisualRoutinesApp(
         }
     }
 
-    VisualRoutinesTheme {
-        when (val screen = visibleScreen) {
-            AppScreen.Home -> HomeScreen(state)
-            AppScreen.Settings -> SettingsScreen(state)
-            AppScreen.PrivacyPolicy -> PrivacyPolicyScreen(state)
-            AppScreen.ManageRoutines -> ManageRoutinesScreen(state)
-            AppScreen.ChooseExample -> ChooseExampleScreen(state)
-            AppScreen.ReorderRoutines -> ReorderRoutinesScreen(state)
-            is AppScreen.CreateRoutine -> CreateRoutineScreen(
-                state = state,
-                draft = screen.draft,
-                onEditorExit = { restorableEditorScreen = null },
-            )
-            is AppScreen.EditRoutine -> EditRoutineScreen(
-                state = state,
-                routineId = screen.routineId,
-                draft = screen.draft,
-                onEditorExit = { restorableEditorScreen = null },
-            )
-            is AppScreen.RoutineStart -> StartScreen(state, state.routine(screen.routineId))
-            AppScreen.Runner -> RunnerScreen(state)
-            is AppScreen.Complete -> CompleteScreen(state, state.routine(screen.routineId))
+    val settings = state.homeSettings
+    val resolvedPalette = palette ?: resolveThemePalette(
+        settings.appearanceMode, settings.darkThemeStyle, isSystemInDarkTheme(),
+    )
+    VisualRoutinesTheme(resolvedPalette) {
+        ThemeSystemBars()
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+        ) {
+            when (val screen = visibleScreen) {
+                AppScreen.Home -> HomeScreen(state)
+                AppScreen.Settings -> SettingsScreen(state)
+                AppScreen.PrivacyPolicy -> PrivacyPolicyScreen(state)
+                AppScreen.ManageRoutines -> ManageRoutinesScreen(state)
+                AppScreen.ChooseExample -> ChooseExampleScreen(state)
+                AppScreen.ReorderRoutines -> ReorderRoutinesScreen(state)
+                is AppScreen.CreateRoutine -> CreateRoutineScreen(
+                    state = state,
+                    draft = screen.draft,
+                    onEditorExit = { restorableEditorScreen = null },
+                )
+                is AppScreen.EditRoutine -> EditRoutineScreen(
+                    state = state,
+                    routineId = screen.routineId,
+                    draft = screen.draft,
+                    onEditorExit = { restorableEditorScreen = null },
+                )
+                is AppScreen.RoutineStart -> StartScreen(state, state.routine(screen.routineId))
+                AppScreen.Runner -> RunnerScreen(state)
+                is AppScreen.Complete -> CompleteScreen(state, state.routine(screen.routineId))
+            }
+            AppDialog(state)
         }
-        AppDialog(state)
     }
 }
 
@@ -192,6 +208,7 @@ internal fun ScreenSurface(
     modifier: Modifier = Modifier,
     applySystemBarsPadding: Boolean = true,
     applyTopContentPadding: Boolean = true,
+    applyBottomContentPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val systemBarsModifier = if (applySystemBarsPadding) {
@@ -215,7 +232,7 @@ internal fun ScreenSurface(
                     start = 24.dp,
                     top = if (applyTopContentPadding) 28.dp else 0.dp,
                     end = 24.dp,
-                    bottom = 28.dp,
+                    bottom = if (applyBottomContentPadding) 28.dp else 0.dp,
                 ),
         ) {
             content()

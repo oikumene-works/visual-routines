@@ -75,6 +75,17 @@ internal class VisualRoutinesState(
         updateHomeSettings(homeSettings.copy(allowRoutineEditing = allow))
     }
 
+    /** Changes appearance without navigating or resetting the retained dark style. */
+    fun updateAppearanceMode(mode: AppearanceMode) {
+        updateHomeSettings(homeSettings.copy(appearanceMode = mode))
+    }
+
+    /** Fixed Light disables this action; System permits preselection even while light. */
+    fun updateDarkThemeStyle(style: DarkThemeStyle) {
+        if (homeSettings.appearanceMode == AppearanceMode.Light) return
+        updateHomeSettings(homeSettings.copy(darkThemeStyle = style))
+    }
+
     fun openCreateRoutine(
         draft: CreateRoutineDraft = CreateRoutineDraft(),
         returnDestination: CreateRoutineReturnDestination = CreateRoutineReturnDestination.Home,
