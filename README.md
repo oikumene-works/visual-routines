@@ -16,10 +16,11 @@ the preferred APK channel. It was added to F-Droid on 2026-11-01.
 An untagged commit or development APK is not a release.
 This repository does not publish APKs or Android App Bundles.
 
-The [0.3.0 candidate](CHANGELOG.md#030---unreleased) adds selectable appearance
+The [0.3.0 source](CHANGELOG.md#030---2026-11-19) adds selectable appearance
 and Black (AMOLED) styling, improves keyboard visibility, and includes storage
-recovery corrections. It is not yet released. Codex implemented and tested these
-changes; the changelog distinguishes automated work and human listening checks.
+recovery corrections. F-Droid availability depends on its build, signing and
+publication process. Codex implemented and tested these changes; the changelog
+distinguishes automated work and human listening checks.
 
 ## Features
 
