@@ -2,7 +2,7 @@
 
 All notable user-visible changes are recorded here.
 
-## 0.3.0 - Unreleased
+## 0.3.0 - 2026-11-19
 
 ### Added
 
@@ -29,9 +29,8 @@ All notable user-visible changes are recorded here.
 - Ignore wrongly typed saved progress during startup so intact routines remain
   accessible, without clearing the stored progress snapshot.
 
-This is an unpublished candidate; these changes are not part of released
-version 0.2.0. Codex implemented the changes and ran local and device checks,
-including synthetic recovery cases. The operator selected the Appearance design
+Codex implemented the changes and ran local and device checks, including
+synthetic recovery cases. The operator selected the Appearance design
 and confirmed the focused TalkBack listening checks on phone and tablet.
 Validation covers the recorded cases, not every device or the frequency of
 exceptional recovery conditions. A new F-Droid binary has not been validated.
